@@ -22,7 +22,7 @@ local keys = {
    { key = 'F11', mods = 'NONE',    action = act.ToggleFullScreen },
    { key = 'F12', mods = 'NONE',    action = act.ShowDebugOverlay },
    { key = 'f',   mods = mod.SUPER, action = act.Search({ CaseInSensitiveString = '' }) },
-   { key = 'k',   mods = mod.SUPER, action = act.ClearScrollback('ScrollbackOnly') },
+   { key = 'k',   mods = mod.SUPER, action = act.ClearScrollback('ScrollbackAndViewport') },
    {
       key = 'u',
       mods = mod.SUPER_REV,
