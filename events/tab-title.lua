@@ -45,7 +45,6 @@ local GLYPH_SCIRCLE_LEFT = nf.ple_left_half_circle_thick --[[  ]]
 local GLYPH_SCIRCLE_RIGHT = nf.ple_right_half_circle_thick --[[  ]]
 local GLYPH_CIRCLE = nf.fa_circle --[[  ]]
 local GLYPH_ADMIN = nf.md_shield_half_full --[[ 󰞀 ]]
-local GLYPH_LINUX = nf.cod_terminal_linux --[[  ]]
 local GLYPH_DEBUG = nf.fa_bug --[[  ]]
 -- local GLYPH_SEARCH = nf.fa_search --[[  ]]
 local GLYPH_SEARCH = '🔭'
@@ -86,8 +85,6 @@ local RENDER_VARIANTS = {
    { 'scircle_left', 'title', 'unseen_output', 'padding', 'scircle_right' },
    { 'scircle_left', 'admin', 'title', 'padding', 'scircle_right' },
    { 'scircle_left', 'admin', 'title', 'unseen_output', 'padding', 'scircle_right' },
-   { 'scircle_left', 'wsl', 'title', 'padding', 'scircle_right' },
-   { 'scircle_left', 'wsl', 'title', 'unseen_output', 'padding', 'scircle_right' },
 }
 
 
@@ -181,7 +178,6 @@ end
 ---@field cells FormatCells
 ---@field title_locked boolean
 ---@field locked_title string
----@field is_wsl boolean
 ---@field is_admin boolean
 ---@field unseen_output boolean
 ---@field unseen_output_count number
@@ -195,7 +191,6 @@ function Tab:new()
       cells = Cells:new(),
       title_locked = false,
       locked_title = '',
-      is_wsl = false,
       is_admin = false,
       unseen_output = false,
       unseen_output_count = 0,
@@ -209,7 +204,6 @@ end
 function Tab:set_info(event_opts, tab, max_width)
    local process_name = clean_process_name(tab.active_pane.foreground_process_name)
 
-   self.is_wsl = process_name:match('^wsl') ~= nil
    self.is_admin = (
       tab.active_pane.title:match('^Administrator: ') or tab.active_pane.title:match('(Admin)')
    ) ~= nil
@@ -220,7 +214,7 @@ function Tab:set_info(event_opts, tab, max_width)
       self.unseen_output, self.unseen_output_count = check_unseen_output(tab.panes)
    end
 
-   local inset = (self.is_admin or self.is_wsl) and TITLE_INSET.ICON or TITLE_INSET.DEFAULT
+   local inset = self.is_admin and TITLE_INSET.ICON or TITLE_INSET.DEFAULT
    if self.unseen_output then
       inset = inset + 2
    end
@@ -237,7 +231,6 @@ function Tab:create_cells()
    self.cells
       :add_segment('scircle_left', GLYPH_SCIRCLE_LEFT)
       :add_segment('admin', ' ' .. GLYPH_ADMIN)
-      :add_segment('wsl', ' ' .. GLYPH_LINUX)
       :add_segment('title', ' ', nil, attr(attr.intensity('Bold')))
       :add_segment('unseen_output', ' ' .. GLYPH_CIRCLE)
       :add_segment('padding', ' ')
@@ -279,7 +272,6 @@ function Tab:update_cells(event_opts, is_active, hover)
    self.cells
       :update_segment_colors('scircle_left', colors['scircle_' .. tab_state])
       :update_segment_colors('admin', colors['text_' .. tab_state])
-      :update_segment_colors('wsl', colors['text_' .. tab_state])
       :update_segment_colors('title', colors['text_' .. tab_state])
       :update_segment_colors('unseen_output', colors['unseen_output_' .. tab_state])
       :update_segment_colors('padding', colors['text_' .. tab_state])
@@ -289,9 +281,6 @@ end
 ---@return FormatItem[] (ref: https://wezfurlong.org/wezterm/config/lua/wezterm/format.html)
 function Tab:render()
    local variant_idx = self.is_admin and 3 or 1
-   if self.is_wsl then
-      variant_idx = 5
-   end
 
    if self.unseen_output then
       variant_idx = variant_idx + 1
