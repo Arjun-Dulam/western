@@ -1,5 +1,6 @@
 local wezterm = require('wezterm')
 local backdrops = require('utils.backdrops')
+local resurrect = require('events.resurrect')
 local act = wezterm.action
 
 local mod = {
@@ -241,10 +242,35 @@ local keys = {
          timeout_milliseconds = 1000,
       }),
    },
+   -- session management
+   {
+      key = 'q',
+      mods = 'LEADER',
+      action = act.ActivateKeyTable({
+         name = 'session',
+         one_shot = true,
+         timeout_milliseconds = 1000,
+      }),
+   },
 }
 
 -- stylua: ignore
 local key_tables = {
+   session = {
+      {
+         key = 's',
+         action = wezterm.action_callback(function(window, pane)
+            resurrect.save_workspace(window, pane)
+         end),
+      },
+      {
+         key = 'r',
+         action = wezterm.action_callback(function(window, pane)
+            resurrect.fuzzy_restore(window, pane)
+         end),
+      },
+      { key = 'Escape', action = 'PopKeyTable' },
+   },
    resize_font = {
       { key = 'k',      action = act.IncreaseFontSize },
       { key = 'j',      action = act.DecreaseFontSize },
