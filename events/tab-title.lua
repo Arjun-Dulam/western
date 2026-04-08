@@ -328,16 +328,6 @@ M.setup = function(opts)
       tab:set_title('')
    end)
 
-   -- CUSTOM EVENT
-   -- Event listener to manually update the tab name
-   wezterm.on('tabs.toggle-tab-bar', function(window, _pane)
-      local effective_config = window:effective_config()
-      window:set_config_overrides({
-         enable_tab_bar = not effective_config.enable_tab_bar,
-         background = effective_config.background,
-      })
-   end)
-
    -- BUILTIN EVENT
    wezterm.on('format-tab-title', function(tab, _tabs, _panes, _config, hover, max_width)
       if not tab_list[tab.tab_id] then
@@ -347,6 +337,7 @@ M.setup = function(opts)
          end
          tab_list[tab.tab_id]:set_info(valid_opts, tab, max_width)
          tab_list[tab.tab_id]:create_cells()
+         tab_list[tab.tab_id]:update_cells(valid_opts, tab.is_active, hover)
          return tab_list[tab.tab_id]:render()
       end
 

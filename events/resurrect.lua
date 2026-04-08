@@ -63,7 +63,11 @@ M.fuzzy_restore = function(window, pane)
       elseif state_type == 'window' then
          local state = resurrect.state_manager.load_state(state_name, 'window')
          opts.close_open_tabs = true
-         resurrect.window_state.restore_window(window:mux_window(), state, opts)
+         local mux_win = window:mux_window()
+         resurrect.window_state.restore_window(mux_win, state, opts)
+         if state.title and state.title ~= '' then
+            session_names[mux_win:window_id()] = state.title
+         end
       elseif state_type == 'tab' then
          local state = resurrect.state_manager.load_state(state_name, 'tab')
          resurrect.tab_state.restore_tab(window:active_tab(), state, opts)
