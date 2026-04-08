@@ -260,7 +260,7 @@ local key_tables = {
       {
          key = 's',
          action = wezterm.action_callback(function(window, pane)
-            resurrect.save_workspace(window, pane)
+            resurrect.save_window(window, pane)
          end),
       },
       {

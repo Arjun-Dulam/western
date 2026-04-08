@@ -7,17 +7,28 @@ local M = {}
 
 M.setup = function() end
 
-M.save_workspace = function(window, pane)
+M.save_window = function(window, pane)
+   local mux_win = window:mux_window()
+   local current_title = mux_win:get_title()
+   local description = 'Session name'
+   if current_title and current_title ~= '' then
+      description = description .. ' [current: ' .. current_title .. '] (empty = keep current)'
+   end
+   description = description .. ':'
    window:perform_action(
       wezterm.action.PromptInputLine({
-         description = 'Session name (empty = keep current):',
+         description = description,
          action = wezterm.action_callback(function(w, _p, name)
+            local mw = w:mux_window()
             if name and #name > 0 then
-               wezterm.mux.rename_workspace(wezterm.mux.get_active_workspace(), name)
+               mw:set_title(name)
+            elseif not mw:get_title() or mw:get_title() == '' then
+               w:toast_notification('wezterm', 'Session name required', nil, 2000)
+               return
             end
-            local ws_state = resurrect.workspace_state.get_workspace_state()
-            resurrect.state_manager.save_state(ws_state)
-            w:toast_notification('wezterm', 'Workspace saved', nil, 2000)
+            local win_state = resurrect.window_state.get_window_state(mw)
+            resurrect.state_manager.save_state(win_state)
+            w:toast_notification('wezterm', 'Session saved', nil, 2000)
          end),
       }),
       pane
@@ -47,6 +58,7 @@ M.fuzzy_restore = function(window, pane)
          resurrect.workspace_state.restore_workspace(state, opts)
       elseif state_type == 'window' then
          local state = resurrect.state_manager.load_state(state_name, 'window')
+         opts.close_open_tabs = true
          resurrect.window_state.restore_window(window:mux_window(), state, opts)
       elseif state_type == 'tab' then
          local state = resurrect.state_manager.load_state(state_name, 'tab')

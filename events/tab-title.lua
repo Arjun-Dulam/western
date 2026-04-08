@@ -311,6 +311,7 @@ M.setup = function(opts)
                   local tab = window:active_tab()
                   local id = tab:tab_id()
                   tab_list[id]:update_and_lock_title(line)
+                  tab:set_title(line)
                end
             end),
          }),
@@ -324,6 +325,7 @@ M.setup = function(opts)
       local tab = window:active_tab()
       local id = tab:tab_id()
       tab_list[id].title_locked = false
+      tab:set_title('')
    end)
 
    -- CUSTOM EVENT
@@ -340,6 +342,9 @@ M.setup = function(opts)
    wezterm.on('format-tab-title', function(tab, _tabs, _panes, _config, hover, max_width)
       if not tab_list[tab.tab_id] then
          tab_list[tab.tab_id] = Tab:new()
+         if tab.tab_title and tab.tab_title ~= '' then
+            tab_list[tab.tab_id]:update_and_lock_title(tab.tab_title)
+         end
          tab_list[tab.tab_id]:set_info(valid_opts, tab, max_width)
          tab_list[tab.tab_id]:create_cells()
          return tab_list[tab.tab_id]:render()
